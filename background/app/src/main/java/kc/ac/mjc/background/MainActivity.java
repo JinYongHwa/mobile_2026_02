@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent=new Intent(MainActivity.this,DownloadService.class);
                 startService(intent);
-                //finish();   //액티비티 종료
+                finish();   //액티비티 종료
             }
         });
 

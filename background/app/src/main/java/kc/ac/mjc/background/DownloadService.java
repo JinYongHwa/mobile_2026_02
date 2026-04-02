@@ -1,5 +1,8 @@
 package kc.ac.mjc.background;
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC;
+
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -18,6 +21,8 @@ public class DownloadService extends Service {
     NotificationCompat.Builder builder;
     final int NOTIFICATION_ID=1000;
     final String CHANNEL_NAME="download";
+
+    Notification notification;
 
     @Nullable
     @Override
@@ -38,13 +43,23 @@ public class DownloadService extends Service {
                 .setProgress(100,progress,false)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setOngoing(true);
-        nm.notify(NOTIFICATION_ID,builder.build());     //알림을 띄운다
+        notification=builder.build();
+        nm.notify(NOTIFICATION_ID,notification);     //알림을 띄운다
+
+        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.Q){
+            startForeground(NOTIFICATION_ID,notification,FOREGROUND_SERVICE_TYPE_DATA_SYNC);
+        }
+        else{
+            startForeground(NOTIFICATION_ID,notification);
+        }
+
+
 
 
         Thread t=new Thread(new Runnable() {
             @Override
             public void run() {
-                for(int i=0;i<=100;i+=10){
+                for(int i=0;i<=100;i+=1){
                     progress=i;
                     try {
                         Thread.sleep(1000);
@@ -55,7 +70,8 @@ public class DownloadService extends Service {
 
                     //알림차에 바뀐 progress 적용하기
                     builder.setProgress(100,progress,false);
-                    nm.notify(NOTIFICATION_ID,builder.build());
+                    notification=builder.build();
+                    nm.notify(NOTIFICATION_ID,notification);
 
                     if(progress>=90){   //progress 90이되면
                         nm.cancel(NOTIFICATION_ID);
